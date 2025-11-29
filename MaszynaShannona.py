@@ -13,14 +13,14 @@ zapisaneWzorce = {
 # ostatni wzorzec użyty do przewidywania
 ostatni_wzorzec = None
 
-# Początkowe 3 wybory – wpisujesz REALNE rundy (swoje i maszyny)
+# Początkowe 3 wybory – czysto losowe, bez „inteligencji”
 powtórzenie = 3
 while powtórzenie > 0:
-    wyboryCzlowieka.append(input("Runda startowa\nTwój wybór (1 lub 0): "))
-    wyboryMaszyny.append(int(input("Wybór maszyny (1 lub 0): ")))
+    wyboryCzlowieka.append(input("Wpisz 1 lub 0\n"))
+    wyboryMaszyny.append(randint(0, 1))
     print(f"Maszyna wybrała: {wyboryMaszyny[-1]}")
     
-    # Sprawdź wynik (jak Ci poszło w tej rundzie)
+    # Sprawdź wynik
     if int(wyboryCzlowieka[-1]) == wyboryMaszyny[-1]:
         print("❌ PRZEGRAŁEŚ (maszyna zgadła twój wybór)")
     else:
@@ -29,12 +29,31 @@ while powtórzenie > 0:
     powtórzenie = powtórzenie - 1
 
 while True:
-    # --- ANTYMASZYNA: wprowadzasz OSTATNIĄ rozegraną rundę ---
-    wyboryCzlowieka.append(input("\nNowa runda\nTwój ostatni wybór (1 lub 0): "))
-    wyboryMaszyny.append(int(input("Ostatni wybór maszyny (1 lub 0): ")))
+    # --- WYBÓR MASZYNY NA PODSTAWIE PAMIĘCI (MASZYNA SHANNONA) ---
+    if ostatni_wzorzec is not None and zapisaneWzorce[ostatni_wzorzec][0] != "Nieznany":
+        # wiemy, czy po tym wzorcu człowiek zwykle ZMIENIA (D) czy POWTARZA (S)
+        przewidywana_zmiana = zapisaneWzorce[ostatni_wzorzec][0]
+        ostatni_ruch_czlowieka = int(wyboryCzlowieka[-1])
+        
+        if przewidywana_zmiana == "S":
+            przewidywany_ruch_czlowieka = ostatni_ruch_czlowieka
+        else:  # "D"
+            przewidywany_ruch_czlowieka = 1 - ostatni_ruch_czlowieka
+        
+        ruchMaszyny = przewidywany_ruch_czlowieka   # maszyna próbuje ZGADNĄĆ ruch człowieka
+    else:
+        # jeszcze nie mamy wiedzy – strzał losowy
+        ruchMaszyny = randint(0, 1)
+    # ---------------------------------------------------------------
+
+    # Dodaj wybór człowieka
+    wyboryCzlowieka.append(input("Wpisz 1 lub 0\n"))
+    
+    # Wypisz wybór maszyny (już nie losowy, tylko przewidywany)
+    wyboryMaszyny.append(ruchMaszyny)
     print(f"Maszyna wybrała: {wyboryMaszyny[-1]}")
     
-    # Sprawdź wynik tej rozegranej rundy
+    # Sprawdź wynik
     if int(wyboryCzlowieka[-1]) == wyboryMaszyny[-1]:
         print("❌ PRZEGRAŁEŚ (maszyna zgadła twój wybór)")
     else:
@@ -87,20 +106,4 @@ while True:
     ostatni_wzorzec = wzorzec
     
     print(f"Wzorzec: {wzorzec}, Odpowiedź Człowieka: {zapisaneWzorce[wzorzec][0]}, Wystąpień: {zapisaneWzorce[wzorzec][1]}")
-    
-    # --- TERAZ PRZEWIDUJEMY KOLEJNY RUCH MASZYNY (ANTI-SHANNON) ---
-    if ostatni_wzorzec is not None and zapisaneWzorce[ostatni_wzorzec][0] != "Nieznany":
-        przewidywana_zmiana = zapisaneWzorce[ostatni_wzorzec][0]
-        ostatni_ruch_czlowieka = int(wyboryCzlowieka[-1])
-        
-        if przewidywana_zmiana == "S":
-            przewidywany_ruch_maszyny = ostatni_ruch_czlowieka
-        else:  # "D"
-            przewidywany_ruch_maszyny = 1 - ostatni_ruch_czlowieka
-    else:
-        # jeszcze nie mamy wiedzy – strzał losowy co do maszyny
-        przewidywany_ruch_maszyny = randint(0, 1)
-    
-    print(f"👾 Maszyna PRAWDPODOBNIE wybierze: {przewidywany_ruch_maszyny}")
-    print(f"✅ ŻEBY WYGRAĆ, wybierz: {1 - przewidywany_ruch_maszyny}")
     print("-" * 50)
