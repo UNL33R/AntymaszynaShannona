@@ -10,7 +10,7 @@ zapisaneWzorce = {
     "LDW": ["Nieznany", 0], "LDL": ["Nieznany", 0]
 }
 
-# ostatni wzorzec użyty do przewidywania
+# wzorzec używany DO PREDYKCJI w następnej rundzie
 ostatni_wzorzec = None
 
 # Początkowe 3 wybory – czysto losowe, bez „inteligencji”
@@ -30,8 +30,11 @@ while powtórzenie > 0:
 
 while True:
     # --- WYBÓR MASZYNY NA PODSTAWIE PAMIĘCI (MASZYNA SHANNONA) ---
-    if ostatni_wzorzec is not None and zapisaneWzorce[ostatni_wzorzec][0] != "Nieznany":
-        # wiemy, czy po tym wzorcu człowiek zwykle ZMIENIA (D) czy POWTARZA (S)
+    if (
+        ostatni_wzorzec is not None 
+        and zapisaneWzorce[ostatni_wzorzec][0] != "Nieznany"
+    ):
+        # znamy zachowanie gracza po takim wzorcu: S (ten sam) albo D (inny)
         przewidywana_zmiana = zapisaneWzorce[ostatni_wzorzec][0]
         ostatni_ruch_czlowieka = int(wyboryCzlowieka[-1])
         
@@ -42,14 +45,14 @@ while True:
         
         ruchMaszyny = przewidywany_ruch_czlowieka   # maszyna próbuje ZGADNĄĆ ruch człowieka
     else:
-        # jeszcze nie mamy wiedzy – strzał losowy
+        # brak wiedzy dla aktualnego wzorca – strzał losowy
         ruchMaszyny = randint(0, 1)
     # ---------------------------------------------------------------
 
     # Dodaj wybór człowieka
     wyboryCzlowieka.append(input("Wpisz 1 lub 0\n"))
     
-    # Wypisz wybór maszyny (już nie losowy, tylko przewidywany)
+    # Wypisz wybór maszyny
     wyboryMaszyny.append(ruchMaszyny)
     print(f"Maszyna wybrała: {wyboryMaszyny[-1]}")
     
@@ -77,33 +80,46 @@ while True:
         else:
             zmianaCzlowieka.append("D")
     
+    # --- UCZENIE: wzorzec dla (N-2, N-1) i zachowanie w N ---
     # Część wzorca - wygrana czy przegrana?
-    przedostatnie2wyniki = wynikiCzlowieka[-3:-1] 
+    przedostatnie2wyniki = wynikiCzlowieka[-3:-1]   # wyniki rund N-2 i N-1
     
-    # Część wzorca - zmiana czy nie?
-    przedostniaZmiana = zmianaCzlowieka[-2:-1] 
+    # Część wzorca - zmiana czy nie między N-2 a N-1?
+    przedostniaZmiana = zmianaCzlowieka[-2:-1]      # zmiana między N-2 i N-1
     
-    # Reakcja człowieka - zmiana czy nie?
-    zmianaPoWzorcu = zmianaCzlowieka[-1] 
+    # Reakcja człowieka po tym wzorcu: zmiana czy nie między N-1 a N
+    zmianaPoWzorcu = zmianaCzlowieka[-1]
     
-    # Połączenie w 1 wzorzec
-    wzorzec = przedostatnie2wyniki[0] + przedostniaZmiana[0] + przedostatnie2wyniki[1]
+    # Połączenie w 1 wzorzec (N-2, zmiana N-2→N-1, N-1)
+    wzorzec_uczenia = (
+        przedostatnie2wyniki[0] 
+        + przedostniaZmiana[0] 
+        + przedostatnie2wyniki[1]
+    )
     
-    # Sprawdź czy wzorzec jest "Nieznany" lub czy odpowiedź się zgadza
-    if zapisaneWzorce[wzorzec][0] == "Nieznany":
-        # Pierwszy raz widzimy ten wzorzec - zapisz odpowiedź
-        zapisaneWzorce[wzorzec][0] = zmianaPoWzorcu
-        zapisaneWzorce[wzorzec][1] = 1
-    elif zapisaneWzorce[wzorzec][0] == zmianaPoWzorcu:
-        # Odpowiedź się zgadza - zwiększ licznik
-        zapisaneWzorce[wzorzec][1] = zapisaneWzorce[wzorzec][1] + 1
+    # Aktualizacja pamięci dla wzorca_uczenia
+    if zapisaneWzorce[wzorzec_uczenia][0] == "Nieznany":
+        zapisaneWzorce[wzorzec_uczenia][0] = zmianaPoWzorcu
+        zapisaneWzorce[wzorzec_uczenia][1] = 1
+    elif zapisaneWzorce[wzorzec_uczenia][0] == zmianaPoWzorcu:
+        zapisaneWzorce[wzorzec_uczenia][1] = zapisaneWzorce[wzorzec_uczenia][1] + 1
     else:
-        # Odpowiedź się nie zgadza - resetuj wzorzec
-        zapisaneWzorce[wzorzec][0] = "Nieznany"
-        zapisaneWzorce[wzorzec][1] = 0
+        zapisaneWzorce[wzorzec_uczenia][0] = "Nieznany"
+        zapisaneWzorce[wzorzec_uczenia][1] = 0
 
-    # zapamiętaj ostatni wzorzec do użycia przy KOLEJNEJ predykcji
-    ostatni_wzorzec = wzorzec
+    # --- NOWE: wzorzec do PREDYKCJI dla następnej rundy (N+1) ---
+    # tu patrzymy na OSTATNIE dwie rundy: (N-1, N)
+    if len(wynikiCzlowieka) >= 2 and len(zmianaCzlowieka) >= 1:
+        poprzedni_wynik = wynikiCzlowieka[-2]   # wynik rundy N-1
+        ostatni_wynik   = wynikiCzlowieka[-1]   # wynik rundy N
+        ostatnia_zmiana = zmianaCzlowieka[-1]   # zmiana między N-1 i N
+        
+        ostatni_wzorzec = poprzedni_wynik + ostatnia_zmiana + ostatni_wynik
+    else:
+        ostatni_wzorzec = None
     
-    print(f"Wzorzec: {wzorzec}, Odpowiedź Człowieka: {zapisaneWzorce[wzorzec][0]}, Wystąpień: {zapisaneWzorce[wzorzec][1]}")
+    print(f"Wzorzec (uczenie): {wzorzec_uczenia}, "
+          f"Odpowiedź Człowieka: {zapisaneWzorce[wzorzec_uczenia][0]}, "
+          f"Wystąpień: {zapisaneWzorce[wzorzec_uczenia][1]}")
+    print(f"Wzorzec do predykcji na kolejną rundę: {ostatni_wzorzec}")
     print("-" * 50)
