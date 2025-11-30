@@ -47,7 +47,7 @@ while True:
     zmianaCzlowieka = []   # S / D
 
     for i in range(len(wyboryCzlowieka)):
-        if int(wyboryCzlowieka[i]) == wyboryMaszyny[i]:
+        if wyboryCzlowieka[i] == wyboryMaszyny[i]:
             wynikiCzlowieka.append("L")
         else:
             wynikiCzlowieka.append("W")
