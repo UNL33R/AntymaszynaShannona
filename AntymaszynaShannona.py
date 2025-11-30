@@ -1,7 +1,4 @@
-# AntyMaszynaShannona.py
-# Antymaszy na Shannona dopasowana logiką do MaszynaShannona.py / GUI.
-
-from random import randint  # używane tylko, jeśli chcesz symulować, tutaj NIE losujemy ruchu maszyny
+from random import randint
 
 PATTERNS = ["WSW", "WSL", "WDW", "WDL",
             "LSW", "LSL", "LDW", "LDL"]
@@ -95,7 +92,7 @@ def main():
             if h in ("0", "1"):
                 player_move = int(h)
                 break
-            print("Podaj 0 lub 1 (albo q).")
+            print("Podaj 0 lub 1 (q = wyjście).")
 
         while True:
             m = input("Ostatni wybór maszyny (0/1): ").strip()
