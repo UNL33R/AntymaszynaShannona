@@ -17,11 +17,11 @@ ostatni_wzorzec = None
 
 powtórzenie = 3
 while powtórzenie > 0:
-    wyboryCzlowieka.append(input("Runda startowa\nTwój wybór (1 lub 0): "))
+    wyboryCzlowieka.append(int(input("Runda startowa\nTwój wybór (1 lub 0): ")))
     wyboryMaszyny.append(int(input("Wybór maszyny (1 lub 0): ")))
     print(f"Maszyna wybrała: {wyboryMaszyny[-1]}")
 
-    if int(wyboryCzlowieka[-1]) == wyboryMaszyny[-1]:
+    if wyboryCzlowieka[-1] == wyboryMaszyny[-1]:
         print("❌ PRZEGRAŁEŚ (maszyna zgadła twój wybór)")
     else:
         print("✅ WYGRAŁEŚ (maszyna się pomyliła)")
@@ -32,11 +32,11 @@ while powtórzenie > 0:
 
 while True:
     # wprowadzasz ostatnio ROZEGRANĄ rundę (tak jak w maszynie)
-    wyboryCzlowieka.append(input("\nNowa runda\nTwój ostatni wybór (1 lub 0): "))
+    wyboryCzlowieka.append(int(input("\nNowa runda\nTwój ostatni wybór (1 lub 0): ")))
     wyboryMaszyny.append(int(input("Ostatni wybór maszyny (1 lub 0): ")))
     print(f"Maszyna wybrała: {wyboryMaszyny[-1]}")
 
-    if int(wyboryCzlowieka[-1]) == wyboryMaszyny[-1]:
+    if wyboryCzlowieka[-1] == wyboryMaszyny[-1]:
         print("❌ PRZEGRAŁEŚ (maszyna zgadła twój wybór)")
     else:
         print("✅ WYGRAŁEŚ (maszyna się pomyliła)")
@@ -115,7 +115,7 @@ while True:
         zapisaneWzorce[ostatni_wzorzec][1] >= 2   # <- tu nowy warunek: wzorzec musi być potwierdzony min. 2 razy
     ):
         przewidywana_zmiana = zapisaneWzorce[ostatni_wzorzec][0]
-        ostatni_ruch_czlowieka = int(wyboryCzlowieka[-1])
+        ostatni_ruch_czlowieka = wyboryCzlowieka[-1]
 
         if przewidywana_zmiana == "S":
             przewidywany_ruch_maszyny = ostatni_ruch_czlowieka
@@ -127,6 +127,6 @@ while True:
     else:
         print("🎲 Maszyna Shannona NIE MA jeszcze POTWIERDZONEGO wzorca dla tej sytuacji.")
         print("🎲 W następnej rundzie będzie LOSOWAĆ (0 lub 1).")
-        print("✅ Tego nie da się przewidzieć lepiej niż rzut monetą – możesz zagrać cokolwiek.")
+        print("✅ Tego nie da się przewidzieć - Wylosuj")
 
     print("-" * 50)
