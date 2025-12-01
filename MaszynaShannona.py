@@ -1,118 +1,131 @@
-# MaszynaShannona.py
-# Prosta wersja konsolowa maszyny Shannona (zgodna z logiką z GUI).
-
 from random import randint
 
-# Wszystkie możliwe wzorce: W/L, S/D, W/L
-PATTERNS = ["WSW", "WSL", "WDW", "WDL",
-            "LSW", "LSL", "LDW", "LDL"]
+wyboryCzlowieka = []
+wyboryMaszyny = []
 
+zapisaneWzorce = {
+    "WSW": ["Nieznany", 0], "WSL": ["Nieznany", 0],
+    "WDW": ["Nieznany", 0], "WDL": ["Nieznany", 0],
+    "LSW": ["Nieznany", 0], "LSL": ["Nieznany", 0],
+    "LDW": ["Nieznany", 0], "LDL": ["Nieznany", 0]
+}
 
-def init_memory():
-    """
-    Pamięć maszyny: dla każdego wzorca trzymamy:
-    - previous_behavior: 'same' / 'different' / None
-    - is_repeated: czy zachowanie zostało już POTWIERDZONE (>=2 razy takie samo)
-    - count: ile razy z rzędu widzieliśmy to samo zachowanie po tym wzorcu
-    """
-    return {
-        p: {"previous_behavior": None, "is_repeated": False, "count": 0}
-        for p in PATTERNS
-    }
+# wzorzec, na podstawie którego MASZYNA będzie przewidywać w KOLEJNEJ rundzie
+ostatni_wzorzec = None
+przewidywany_ruch_maszyny = randint(0, 1)
+# --- 3 RUNDY STARTOWE (maszyna losuje, nie uczy się) ---
 
+powtórzenie = 3
+while powtórzenie > 0:
+    wyboryCzlowieka.append(int(input("Runda startowa\nTwój wybór (1 lub 0): ")))
+    wyboryMaszyny.append(randint(0, 1))
 
-def update_memory(game_history, memory):
-    """
-    Aktualizacja pamięci po zakończeniu rundy.
-    game_history: lista rund (dict):
-        {"playerMove": 0/1, "playerWon": True/False}
-    Używamy trójek rund (N-2, N-1) -> zachowanie w N.
-    """
-    if len(game_history) < 3:
-        return None  # za mało danych
-
-    playN = game_history[-1]   # runda N
-    playN1 = game_history[-2]  # runda N-1
-    playN2 = game_history[-3]  # runda N-2
-
-    # Wyniki W/L z perspektywy gracza
-    outcomeN2 = 'W' if playN2["playerWon"] else 'L'
-    outcomeN1 = 'W' if playN1["playerWon"] else 'L'
-
-    # Zmiana S/D między N-2 a N-1
-    changeN1 = 'S' if playN1["playerMove"] == playN2["playerMove"] else 'D'
-
-    pattern_key = outcomeN2 + changeN1 + outcomeN1
-
-    # Zachowanie gracza po tej sytuacji (w rundzie N): czy powtórzył ruch z N-1?
-    actual_behavior = 'same' if playN["playerMove"] == playN1["playerMove"] else 'different'
-
-    cell = memory[pattern_key]
-
-    if cell["previous_behavior"] is None:
-        # pierwszy raz widzimy ten wzorzec
-        cell["previous_behavior"] = actual_behavior
-        cell["count"] = 1
-        cell["is_repeated"] = False
+    if wyboryCzlowieka[-1] == wyboryMaszyny[-1]:
+        print("❌ PRZEGRAŁEŚ (maszyna zgadła twój wybór)")
     else:
-        if cell["previous_behavior"] == actual_behavior:
-            # to samo zachowanie co poprzednio -> wzorzec się wzmacnia
-            cell["count"] += 1
-            if cell["count"] >= 2:
-                # co najmniej dwa razy pod rząd to samo zachowanie → uznajemy wzorzec
-                cell["is_repeated"] = True
+        print("✅ WYGRAŁEŚ (maszyna się pomyliła)")
+
+    powtórzenie -= 1
+
+# --- GŁÓWNA PĘTLA: po każdej rundzie aktualizujemy pamięć i przewidujemy NASTĘPNĄ ---
+
+while True:
+    # wprowadzasz ostatnio ROZEGRANĄ rundę (tak jak w maszynie)
+    wyboryCzlowieka.append(int(input("\nNowa runda\nTwój ostatni wybór (1 lub 0): ")))
+    wyboryMaszyny.append(przewidywany_ruch_maszyny)
+
+    if wyboryCzlowieka[-1] == wyboryMaszyny[-1]:
+        print("❌ PRZEGRAŁEŚ (maszyna zgadła twój wybór)")
+    else:
+        print("✅ WYGRAŁEŚ (maszyna się pomyliła)")
+
+    # --- PRZELICZ W/L i S/D DLA CAŁEJ HISTORII ---
+
+    wynikiCzlowieka = []   # W / L
+    zmianaCzlowieka = []   # S / D
+
+    for i in range(len(wyboryCzlowieka)):
+        if wyboryCzlowieka[i] == wyboryMaszyny[i]:
+            wynikiCzlowieka.append("L")
         else:
-            # zachowanie inne niż poprzednio → resetujemy licznik
-            cell["previous_behavior"] = actual_behavior
-            cell["count"] = 1
-            cell["is_repeated"] = False
+            wynikiCzlowieka.append("W")
 
-    return pattern_key, actual_behavior, cell
+        if i < len(wyboryCzlowieka) - 1:
+            if wyboryCzlowieka[i] == wyboryCzlowieka[i + 1]:
+                zmianaCzlowieka.append("S")
+            else:
+                zmianaCzlowieka.append("D")
 
+    # --- UCZENIE: jak w poprawionej maszynie ---
 
-def get_prediction(game_history, memory):
-    """
-    Przewidywanie zachowania gracza w KOLEJNEJ rundzie na podstawie
-    dwóch ostatnich rund (N-2, N-1).
-    Zwraca:
-    - 'same' / 'different' lub None
-    - klucz wzorca (np. 'WSW') lub None
-    """
-    if len(game_history) < 2:
-        return None, None
+    if len(wyboryCzlowieka) >= 3:
+        # N = len(wyboryCzlowieka)
+        # wzorzec uczenia oparty na rundach (N-2, N-1), reakcja w N
 
-    playN1 = game_history[-1]  # runda N-1
-    playN2 = game_history[-2]  # runda N-2
+        przedostatnie2wyniki = wynikiCzlowieka[-3:-1]   # wyniki N-2 i N-1
+        przedostniaZmiana = zmianaCzlowieka[-2:-1]      # zmiana N-2 -> N-1
+        zmianaPoWzorcu = zmianaCzlowieka[-1]            # zmiana N-1 -> N
 
-    outcomeN2 = 'W' if playN2["playerWon"] else 'L'
-    outcomeN1 = 'W' if playN1["playerWon"] else 'L'
-    changeN1 = 'S' if playN1["playerMove"] == playN2["playerMove"] else 'D'
+        wzorzec_uczenia = (
+            przedostatnie2wyniki[0] +
+            przedostniaZmiana[0] +
+            przedostatnie2wyniki[1]
+        )
 
-    pattern_key = outcomeN2 + changeN1 + outcomeN1
-    cell = memory[pattern_key]
+        # aktualizacja tabeli wzorców
+        if zapisaneWzorce[wzorzec_uczenia][0] == "Nieznany":
+            zapisaneWzorce[wzorzec_uczenia][0] = zmianaPoWzorcu
+            zapisaneWzorce[wzorzec_uczenia][1] = 1
+        elif zapisaneWzorce[wzorzec_uczenia][0] == zmianaPoWzorcu:
+            zapisaneWzorce[wzorzec_uczenia][1] += 1
+        else:
+            zapisaneWzorce[wzorzec_uczenia][0] = "Nieznany"
+            zapisaneWzorce[wzorzec_uczenia][1] = 0
 
-    if cell["is_repeated"] and cell["previous_behavior"] is not None:
-        # wzorzec został już potwierdzony (>=2 razy)
-        return cell["previous_behavior"], pattern_key
+        print(
+            f"Wzorzec (uczenie): {wzorzec_uczenia}, "
+            f"Odpowiedź Człowieka: {zapisaneWzorce[wzorzec_uczenia][0]}, "
+            f"Wystąpień: {zapisaneWzorce[wzorzec_uczenia][1]}"
+        )
+
+        # --- WZORZEC DO PREDYKCJI NA NASTĘPNĄ RUNDĘ (N+1) ---
+        # oparty na OSTATNICH dwóch rundach: (N-1, N)
+        poprzedni_wynik = wynikiCzlowieka[-2]   # wynik N-1
+        ostatni_wynik = wynikiCzlowieka[-1]     # wynik N
+        ostatnia_zmiana = zmianaCzlowieka[-1]   # zmiana N-1 -> N
+
+        ostatni_wzorzec = (
+            poprzedni_wynik +
+            ostatnia_zmiana +
+            ostatni_wynik
+        )
+        print(f"Wzorzec do predykcji kolejnej rundy: {ostatni_wzorzec}")
     else:
-        # wzorzec niepewny → maszyna powinna losować
-        return None, pattern_key
+        # jeszcze za mało rund, żeby maszyna w ogóle się nauczyła czegokolwiek
+        ostatni_wzorzec = None
+        print("Za mało danych, brak uczenia (mniej niż 3 rundy).")
 
+    # --- TERAZ PRZEWIDUJEMY KOLEJNY RUCH MASZYNY (ANTI-SHANNON) ---
 
-def main():
-    print("=== MASZYNA SHANNONA (wersja tekstowa) ===\n")
-    print("W każdej rundzie wpisz 0 lub 1. Maszyna spróbuje przewidzieć Twój ruch.\n")
+    if (
+        ostatni_wzorzec is not None and
+        zapisaneWzorce[ostatni_wzorzec][0] != "Nieznany" and
+        zapisaneWzorce[ostatni_wzorzec][1] >= 2   # <- tu nowy warunek: wzorzec musi być potwierdzony min. 2 razy
+    ):
+        przewidywana_zmiana = zapisaneWzorce[ostatni_wzorzec][0]
+        ostatni_ruch_czlowieka = wyboryCzlowieka[-1]
 
-    memory = init_memory()
-    game_history = []  # lista dictów: {"playerMove": ..., "playerWon": ...}
-    round_no = 0
+        if przewidywana_zmiana == "S":
+            przewidywany_ruch_maszyny = ostatni_ruch_czlowieka
+        else:  # "D"
+            przewidywany_ruch_maszyny = 1 - ostatni_ruch_czlowieka
 
-    while True:
-        round_no += 1
-        print(f"\n--- RUNDA {round_no} ---")
+        wyboryMaszyny.append(przewidywany_ruch_maszyny)
+    
+    else:
+        przewidywany_ruch_maszyny = randint(0, 1)
+        
+        print("🎲 Maszyna Shannona NIE MA jeszcze POTWIERDZONEGO wzorca dla tej sytuacji.")
+        print("🎲 W następnej rundzie będzie LOSOWAĆ (0 lub 1).")
 
-        # 1. Maszyna przygotowuje prognozę (na podstawie historii)
-        predicted_behavior, pattern_key = get_prediction(game_history, memory)
-
-        if predicted_behavior is None or len(game_history) < 1:
-            # brak pewnego wzorca → losujemy
+    print("-" * 50)
