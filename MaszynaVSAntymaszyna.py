@@ -170,3 +170,5 @@ if LICZBA_RUND > 0:
     proc_maszyna = wynik_maszyna / LICZBA_RUND * 100
     print(f"Procent wygranych anty-maszyny: {proc_czlowiek:.2f}%")
     print(f"Procent trafień maszyny:        {proc_maszyna:.2f}%")
+else:
+    print("Liczba rund nie może równać się 0")
