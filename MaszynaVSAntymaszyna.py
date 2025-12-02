@@ -16,7 +16,7 @@ zapisaneWzorce = {
 ostatni_wzorzec = None
 
 # ile rund ma zagrać maszyna z anty-maszyną
-LICZBA_RUND = 500
+LICZBA_RUND = 1000
 
 # tu będziemy trzymać ruchy NA NASTĘPNĄ rundę
 nast_ruch_czlowieka = None
