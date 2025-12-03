@@ -79,8 +79,8 @@ if __name__ == '__main__':
     print("Serwer Maszyny Shannona uruchomiony!")
     print("=" * 60)
     print("Otworz przegladarke i przejdz do:")
-    print("   http://localhost:5000")
+    print("   http://localhost:8080")
     print("=" * 60)
     print("Nacisnij Ctrl+C aby zatrzymac serwer\n")
     
-    app.run(debug=True, port=5000, host='0.0.0.0')
+    app.run(debug=True, port=8080, host='0.0.0.0')
