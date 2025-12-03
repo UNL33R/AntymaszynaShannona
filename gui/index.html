@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maszyna Shannona - Interaktywne GUI</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="title">🤖 Maszyna Shannona</h1>
+            <p class="subtitle">Interaktywna demonstracja uczenia maszynowego</p>
+        </header>
+
+        <!-- Mode Selection -->
+        <nav class="mode-selector">
+            <button class="mode-btn active" data-mode="shannon">
+                <span class="mode-icon">🎮</span>
+                <span class="mode-name">Maszyna Shannona</span>
+            </button>
+            <button class="mode-btn" data-mode="anti">
+                <span class="mode-icon">🎯</span>
+                <span class="mode-name">Anty-Maszyna</span>
+            </button>
+            <button class="mode-btn" data-mode="simulation">
+                <span class="mode-icon">⚔️</span>
+                <span class="mode-name">Symulacja</span>
+            </button>
+        </nav>
+
+        <!-- Game Area -->
+        <main class="game-area">
+            <!-- Shannon Mode -->
+            <div id="shannon-mode" class="mode-content active">
+                <div class="stats-panel">
+                    <div class="stat-item">
+                        <span class="stat-label">Rundy</span>
+                        <span class="stat-value" id="shannon-rounds">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Twoje wygrane</span>
+                        <span class="stat-value wins" id="shannon-wins">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Trafienia maszyny</span>
+                        <span class="stat-value losses" id="shannon-losses">0</span>
+                    </div>
+                </div>
+
+                <div class="game-controls">
+                    <h3>Twój wybór:</h3>
+                    <div class="choice-buttons">
+                        <button class="choice-btn" data-choice="0">
+                            <span class="choice-number">0</span>
+                        </button>
+                        <button class="choice-btn" data-choice="1">
+                            <span class="choice-number">1</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="result-panel" id="shannon-result">
+                    <p class="result-message">Rozpocznij grę wybierając 0 lub 1</p>
+                </div>
+
+                <div class="pattern-display" id="shannon-patterns">
+                    <h4>Wzorce uczone:</h4>
+                    <div class="patterns-grid"></div>
+                </div>
+
+                <button class="reset-btn" id="shannon-reset">🔄 Nowa gra</button>
+            </div>
+
+            <!-- Anti-Shannon Mode -->
+            <div id="anti-mode" class="mode-content">
+                <div class="stats-panel">
+                    <div class="stat-item">
+                        <span class="stat-label">Rundy</span>
+                        <span class="stat-value" id="anti-rounds">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Twoje wygrane</span>
+                        <span class="stat-value wins" id="anti-wins">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Przegrane</span>
+                        <span class="stat-value losses" id="anti-losses">0</span>
+                    </div>
+                </div>
+
+                <div class="game-controls anti-controls">
+                    <div class="input-group">
+                        <h3>Twój ostatni wybór:</h3>
+                        <div class="choice-buttons">
+                            <button class="choice-btn small" data-anti-human="0">0</button>
+                            <button class="choice-btn small" data-anti-human="1">1</button>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <h3>Wybór maszyny Shannona:</h3>
+                        <div class="choice-buttons">
+                            <button class="choice-btn small" data-anti-machine="0">0</button>
+                            <button class="choice-btn small" data-anti-machine="1">1</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="result-panel" id="anti-result">
+                    <p class="result-message">Wprowadź ostatnią rozegraną rundę</p>
+                </div>
+
+                <div class="recommendation-panel" id="anti-recommendation">
+                    <h4>💡 Rekomendacja:</h4>
+                    <p class="recommendation-text">Brak rekomendacji</p>
+                </div>
+
+                <button class="reset-btn" id="anti-reset">🔄 Nowa gra</button>
+            </div>
+
+            <!-- Simulation Mode -->
+            <div id="simulation-mode" class="mode-content">
+                <div class="simulation-controls">
+                    <div class="input-group">
+                        <label for="rounds-input">Liczba rund:</label>
+                        <input type="number" id="rounds-input" value="100" min="10" max="10000">
+                    </div>
+                    <button class="start-btn" id="start-simulation">▶️ Rozpocznij symulację</button>
+                </div>
+
+                <div class="stats-panel large">
+                    <div class="stat-item">
+                        <span class="stat-label">Rundy</span>
+                        <span class="stat-value" id="sim-rounds">0 / 0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Wygrane Anty-Maszyny</span>
+                        <span class="stat-value wins" id="sim-anti-wins">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Trafienia Maszyny</span>
+                        <span class="stat-value losses" id="sim-machine-wins">0</span>
+                    </div>
+                </div>
+
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="sim-progress"></div>
+                </div>
+
+                <div class="result-panel" id="sim-result">
+                    <p class="result-message">Ustaw liczbę rund i rozpocznij symulację</p>
+                </div>
+
+                <div class="chart-container" id="sim-chart">
+                    <canvas id="resultsChart"></canvas>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>Implementacja algorytmu uczenia maszynowego Claude'a Shannona</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
